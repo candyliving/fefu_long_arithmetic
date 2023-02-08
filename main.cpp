@@ -6,6 +6,10 @@ const double pi = acos(-1);
 
 typedef complex<double> ftype;
 
+fstream fin("in.txt", ios::in);
+fstream fout("out.txt", ios::out);
+fstream fin_answers("answer.txt", ios::in);
+
 string delete_zeros(string num) {
     int counter = num.size();
     for (int i = 0; i < counter; i++) {
@@ -294,102 +298,104 @@ string division(string a, string b) {
     return result.str();
 }
 
-void result(string num1, string operation_sign, string num2) {
-    int minus_1 = 0;
-    int minus_2 = 0;
-    string result_str;
-    if (num1[0] == '-') {
-        minus_1 = 1;
-        num1.erase(0, 1);
-    }
-    if (num2[0] == '-') {
-        minus_2 = 1;
-        num2.erase(0, 1);
-    }
-    vector<int> a, b, result;
-    a = reading_big(num1, a);
-    b = reading_big(num2, b);
-    if (operation_sign == "+") {
-        if (minus_1 == 0 && minus_2 == 0) {
-            cout << result_addition(num1, num2);
-        }
-        if (minus_1 == 1 && minus_2 == 1) {
-            result_str = result_addition(num1, num2);
-            result_str.insert(0, "-");
-            cout << result_str;
-        }
-        if (minus_1 == 1 && minus_2 == 0) {
-            if (is_bigger(a, b)) {
-                result_str = result_subtraction(num1, num2);
-                result_str.insert(0, "-");
-                cout << result_str;
-            } else {
-                result_str = result_subtraction(num2, num1);
-                cout << result_str;
-            }
-        }
-        if (minus_1 == 0 && minus_2 == 1) {
-            if (is_bigger(b, a)) {
-                result_str = result_subtraction(num2, num1);
-                result_str.insert(0, "-");
-                cout << result_str;
-            } else {
-                result_str = result_subtraction(num1, num2);
-                cout << result_str;
-            }
-        }
-    }
-    if (operation_sign == "-") {
-        if (minus_1 == 0 && minus_2 == 0) {
-            if (is_bigger(a, b)) {
-                cout << result_subtraction(num1, num2);
-            } else {
-                result_str = result_subtraction(num2, num1);
-                result_str.insert(0, "-");
-                cout << result_str;
-            }
-        }
-        if (minus_1 == 0 && minus_2 == 1) {
-            cout << result_addition(num1, num2);
-        }
-        if (minus_1 == 1 && minus_2 == 0) {
-            result_str = result_addition(num1, num2);
-            result_str.insert(0, "-");
-            cout << result_str;
-        }
-        if (minus_1 == 1 && minus_2 == 1) {
-            if (is_bigger(a, b)) {
-                result_str = result_subtraction(num1, num2);
-                result_str.insert(0, "-");
-                cout << result_str;
-            } else {
-                result_str = result_subtraction(num2, num1);
-                cout << result_str;
-            }
-        }
-    }
-    if (operation_sign == "*") {
-        multiply(a, b, result);
-        normalize(result);
-        result_str = convert_to_string(result);
-        result_str = delete_zeros(result_str);
-        if ((minus_1 == 1 && minus_2 == 0) || (minus_1 == 0 && minus_2 == 1)) {
-            result_str.insert(0, "-");
-        }
-        cout << result_str;
-    }
-    if (operation_sign == "/") {
-        result_str = division(num1, num2);
-        if ((minus_1 == 1 && minus_2 == 0) || (minus_1 == 0 && minus_2 == 1)) {
-            result_str.insert(0, "-");
-        }
-        cout << result_str;
-    }
-}
-
 int main() {
-    string num1, num2, operation_sign;
-    cin >> num1 >> operation_sign >> num2;
-    result(num1, operation_sign, num2);
+    string num1, num2, operation_sign, result_str, correct_result;
+    int correct_tests = 0, wrong_tests = 0, tests = 0, minus_1 = 0, minus_2 = 0;
+
+    while (tests != 30) {
+        tests += 1;
+        fin >> num1 >> operation_sign >> num2;
+        fin_answers >> correct_result;
+        if (num1[0] == '-') {
+            minus_1 = 1;
+            num1.erase(0, 1);
+        }
+        if (num2[0] == '-') {
+            minus_2 = 1;
+            num2.erase(0, 1);
+        }
+        vector<int> a, b, result;
+        a = reading_big(num1, a);
+        b = reading_big(num2, b);
+        if (operation_sign == "+") {
+            if (minus_1 == 0 && minus_2 == 0) {
+                result_str = result_addition(num1, num2);
+            }
+            if (minus_1 == 1 && minus_2 == 1) {
+                result_str = result_addition(num1, num2);
+                result_str.insert(0, "-");
+            }
+            if (minus_1 == 1 && minus_2 == 0) {
+                if (is_bigger(a, b)) {
+                    result_str = result_subtraction(num1, num2);
+                    result_str.insert(0, "-");
+                } else {
+                    result_str = result_subtraction(num2, num1);
+                }
+            }
+            if (minus_1 == 0 && minus_2 == 1) {
+                if (is_bigger(b, a)) {
+                    result_str = result_subtraction(num2, num1);
+                    result_str.insert(0, "-");
+                } else {
+                    result_str = result_subtraction(num1, num2);
+                }
+            }
+        }
+        if (operation_sign == "-") {
+            if (minus_1 == 0 && minus_2 == 0) {
+                if (is_bigger(a, b) || is_equal(a, b)) {
+                    result_str = result_subtraction(num1, num2);
+                } else {
+                    result_str = result_subtraction(num2, num1);
+                    result_str.insert(0, "-");
+                }
+            }
+            if (minus_1 == 0 && minus_2 == 1) {
+                result_str = result_addition(num1, num2);
+            }
+            if (minus_1 == 1 && minus_2 == 0) {
+                result_str = result_addition(num1, num2);
+                result_str.insert(0, "-");
+            }
+            if (minus_1 == 1 && minus_2 == 1) {
+                if (is_bigger(a, b)) {
+                    result_str = result_subtraction(num1, num2);
+                    result_str.insert(0, "-");
+                } else {
+                    result_str = result_subtraction(num2, num1);
+                }
+            }
+        }
+        if (operation_sign == "*") {
+            multiply(a, b, result);
+            normalize(result);
+            result_str = convert_to_string(result);
+            result_str = delete_zeros(result_str);
+            if ((minus_1 == 1 && minus_2 == 0) || (minus_1 == 0 && minus_2 == 1)) {
+                result_str.insert(0, "-");
+            }
+            if (num1 == "0" || num2 == "0") {
+                result_str = "0";
+            }
+        }
+        if (operation_sign == "/") {
+            result_str = division(num1, num2);
+            if (((minus_1 == 1 && minus_2 == 0) || (minus_1 == 0 && minus_2 == 1)) && num1 != "0") {
+                result_str.insert(0, "-");
+            }
+        }
+        if (result_str == correct_result){
+            fout <<"#"<< tests << " OK: " << result_str << " ANSWER: " << correct_result << endl;
+            correct_tests++;
+        } else{
+            fout <<"#"<< tests << " NOT OK: " << result_str << " ANSWER: " << correct_result << endl;
+            wrong_tests++;
+        }
+        minus_1 = 0;
+        minus_2 = 0;
+    }
+    fout << "CORRECT TESTS: " << correct_tests << endl;
+    fout << "WRONG TESTS: " << wrong_tests << endl;
     return 0;
 }
